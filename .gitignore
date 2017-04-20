@@ -1,0 +1,5 @@
+/dist/
+/setup.py
+.project
+.pydevproject
+.README.md.html
