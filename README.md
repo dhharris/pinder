@@ -52,6 +52,7 @@ This will create two folders, `build` and `dist`. The latter contains the `pinde
 See the [py2app documentation](https://py2app.readthedocs.io/en/latest/) for more information.
 
 ### Todo list
+* Unit testing
 * Refactoring and cleaning up viewer.py
 * Better error handling for popup windows
 * Messaging system
