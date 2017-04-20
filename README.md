@@ -12,6 +12,9 @@ version of Tinder with no ads or distractions.
 * (planned) Messaging system
 * (planned) Cross platform support for app wrappers
 
+### Images
+![screenshot](https://raw.githubusercontent.com/dhharris/pinder/master/pinder_screencap.png)
+
 ### Requirements
 * The latest version of Python 3, which can be found [here](https://www.python.org)
 * The following python libraries (can be installed using pip)
