@@ -8,6 +8,7 @@ import auth
 import os
 import time
 from login import LoginDialog
+from messages import Messages
 
 class PinderApp(wx.App):
     def __init__(self, redirect=False):
@@ -104,6 +105,10 @@ class PinderApp(wx.App):
         # Change location
         changeLocBtn = wx.Button(self.panel, label='Change Location')
         changeLocBtn.Bind(wx.EVT_BUTTON, self.onChangeLoc)
+        
+        # Messages
+        messagesBtn = wx.Button(self.panel, label='Messages')
+        messagesBtn.Bind(wx.EVT_BUTTON, self.onMessages)
 
         # Undo
         undoBtn = wx.Button(self.panel, label='Undo')
@@ -128,6 +133,7 @@ class PinderApp(wx.App):
         
         # Add other buttons
         self.mainSizer.Add(changeLocBtn, 0, wx.ALL, 5)
+        self.mainSizer.Add(messagesBtn, 0, wx.ALL, 5)
         self.mainSizer.Add(logoutBtn, 0, wx.ALL | wx.ALIGN_RIGHT | wx.ALIGN_TOP, 5)
         self.mainSizer.Add(undoBtn, 0, wx.ALL | wx.ALIGN_RIGHT | wx.ALIGN_TOP, 5)
 
@@ -220,12 +226,20 @@ class PinderApp(wx.App):
         self.hopeful = self.last
         self.update_image()
         
+    def onMessages(self, event):
+        t = threading.Thread(target=self.open_messages)
+        t.daemon = True  # thread dies when main thread exits
+        t.start()
+        
     def onLogout(self, event):
         os.remove('.token')
         self.login()
     '''
     UTILITY FUNCTIONS
     '''
+    def open_messages(self):
+        m = Messages(self.frame, self.session)
+        m.Show()
 
     def timer_daemon(self):
         delta = self.session.can_like_in
