@@ -29,11 +29,12 @@ class PinderApp(wx.App):
 
 
         # Authenticate Facebook token
+        self.facebook_token = None
         self.login()
-        
+
         # Start pynder session
         self.start_session()
-        
+
         # Geopy fields
         self.location = 'Somewhere'
         self.latlon = None
@@ -45,20 +46,20 @@ class PinderApp(wx.App):
         self.users_index = 0
         self.hopeful = None
         self.update_user()
-        
+
     def start_session(self):
         # Create pynder session
-        self.facebook_id = auth.get_fb_id(self.facebook_token)
+        self.facebook_id = auth.get_fbid(self.facebook_token)
         self.session = t.Session(self.facebook_id, self.facebook_token)
         self.prof = self.session.profile
         self.canlike = self.session.likes_remaining != 0
-    
+
     def login(self):
         try:
             # Check for previous token
             with open('.token', 'r') as f:
                 self.facebook_token = f.read()
-        except:
+        except IOError:
             tokget = False
             while not tokget:
                 # Ask for username and password
@@ -76,13 +77,15 @@ class PinderApp(wx.App):
                     self.facebook_token = auth.get_fb_access_token(username, password)
                     if type(self.facebook_token) != dict:
                         tokget = True
-                except:
-                    print('Login failed')
-                
+                    else:
+                        print(self.facebook_token)
+                except Exception as e:
+                    print(f'Login failed: {e.__class__.__name__}: {e}')
+
             # Write token to file to keep user logged in
             with open('.token', 'w+') as f:
                 f.write(self.facebook_token)
-                
+
 
     def createWidgets(self):
 
@@ -105,7 +108,7 @@ class PinderApp(wx.App):
         # Change location
         changeLocBtn = wx.Button(self.panel, label='Change Location')
         changeLocBtn.Bind(wx.EVT_BUTTON, self.onChangeLoc)
-        
+
         # Messages
         messagesBtn = wx.Button(self.panel, label='Messages')
         messagesBtn.Bind(wx.EVT_BUTTON, self.onMessages)
@@ -113,7 +116,7 @@ class PinderApp(wx.App):
         # Undo
         undoBtn = wx.Button(self.panel, label='Undo')
         undoBtn.Bind(wx.EVT_BUTTON, self.onUndo)
-        
+
         # Logout
         logoutBtn = wx.Button(self.panel, label='Logout')
         logoutBtn.Bind(wx.EVT_BUTTON, self.onLogout)
@@ -125,12 +128,12 @@ class PinderApp(wx.App):
         self.mainSizer.Add(wx.StaticLine(self.panel, wx.ID_ANY), 0, wx.ALL | wx.EXPAND, 5)
         self.mainSizer.Add(self.namelbl, 0, wx.ALL, 5)
         self.mainSizer.Add(self.imageCtrl, 0, wx.ALL, 5)
-        
+
         # Add like buttons
         self.sizer.Add(dislikeBtn, 0, wx.ALL, 5)
         self.sizer.Add(superLikeBtn, 0, wx.ALL, 5)
         self.sizer.Add(likeBtn, 0, wx.ALL, 5)
-        
+
         # Add other buttons
         self.mainSizer.Add(changeLocBtn, 0, wx.ALL, 5)
         self.mainSizer.Add(messagesBtn, 0, wx.ALL, 5)
@@ -142,10 +145,10 @@ class PinderApp(wx.App):
 
 
         self.mainSizer.Add(self.sizer, 0, wx.ALL, 5)
-        
+
         self.panel.SetSizer(self.mainSizer)
         self.mainSizer.Fit(self.frame)
-        
+
         self.panel.Layout()
 
     def update_user(self):
@@ -207,7 +210,7 @@ class PinderApp(wx.App):
                 loc = None
 
             dlg.Destroy()
-            
+
             geolocator = Nominatim()
             # Look up location given
             try:
@@ -215,7 +218,7 @@ class PinderApp(wx.App):
                 self.latlon = (l.latitude, l.longitude)
                 self.location = loc
                 loc_set = True
-    
+
             except Exception as e:
                 print('Error setting location\n' + str(e))
         self.session.update_location(self.latlon[0], self.latlon[1])
@@ -225,12 +228,12 @@ class PinderApp(wx.App):
         self.users_index -= 1
         self.hopeful = self.last
         self.update_image()
-        
+
     def onMessages(self, event):
         t = threading.Thread(target=self.open_messages)
         t.daemon = True  # thread dies when main thread exits
         t.start()
-        
+
     def onLogout(self, event):
         os.remove('.token')
         self.login()
